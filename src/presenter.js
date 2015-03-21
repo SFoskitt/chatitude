@@ -1,46 +1,40 @@
-window.presenter = function(){
-	var presenter = {}
-	presenter.presenterList = []
-	presenter.views = {}
-	presenter.Presenter = function(parent, newView){
+app.presenter = (function(){
+	var presenterList = []
+	var views = {}
+	var Presenter = function(parent, newView){
 		$parent = $(parent)
-		debugger
 		this.render = function(){
-			$parent.empty().append(
-				newView()
+			$parent.append(
+				newView
 				// model.messages.map(view.Message(message.user, message.message, message.time))
 			)
 		}
 	}
 
-	presenter.mount = function(parent, newView){
-		instance = new presenter.Presenter(parent, newView)
+	var mount = function(parent, newView){
+		debugger
+		instance = new Presenter(parent, newView)
 		instance.render()
 	}
 
 
-	presenter.updateMessages = function(){
-		
+	var updateMessages = function(){
+		var messages = app.model.get('messages')
+		for (var i = 0; i < messages.length; i++){
+			mount('.messageWindow', app.view.Message(messages[i].user, messages[i].message, messages[i].time))
+		}
 	}
 
 
+	app.events.on('change:messages', updateMessages)
+	app.events.on('firstrun', function() {
+		mount('body', app.view.MessageWindow())
+	})
 
 
-	debugger
-	app.events.on('change:messages', presenter.updateMessages)
+	return {
 
 
-	return presenter
-}
-
-// presenter.Presenter = function(parent, newView){
-// 	$parent = $(parent)
-// 	this.render = function(){
-// 		debugger
-// 		$parent.empty().append(
-// 			newView(),
-// 			model.messages.map(view.Message(message.user, message.message, message.time))
-// 		)
-// 	}
-// }
+	}
+})()
 

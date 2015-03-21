@@ -1,11 +1,14 @@
-(function(){
-	window.app = {}
+var app = (function(){
 
-	app.events = new Events()
-	app.presenter = presenter()
-	debugger
-	// _.extend(app, pubsub)
+	var events = new Events()
+	var init = function(){
+		events.emit('init')
+	}
 
-	model.Chat.fetch()
+	return {
+		events: events,
+		init: init
+	}
 
+	
 })()
