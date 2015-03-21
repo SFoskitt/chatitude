@@ -40,7 +40,7 @@ app.presenter = (function(){
 	app.events.on('init', function() {
 		if(localStorage.username){
 			app.model.setLogin(localStorage.username, localStorage.password)
-			app.model.signin($('#username').val(), $('#password').val())
+			app.model.signin()
 		} else {
 			mount('body', app.view.Sign())
 			$('#submit').click(function(e){
