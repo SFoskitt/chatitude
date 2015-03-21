@@ -1,0 +1,23 @@
+{
+  "name": "chatitude",
+  "version": "0.0.0",
+  "homepage": "https://github.com/spintronics/chatitude",
+  "authors": [
+    "MKS-Student <mks.student@hackreactor.com>"
+  ],
+  "dependencies": {
+    "jQuery": "latest",
+    "underscore": "latest"
+  },
+  "description": "chat with attitude",
+  "main": "idex.html",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
