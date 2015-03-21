@@ -1,28 +1,36 @@
 app.model = (function(){
-  var messages = []
+  var messages = {}
   var endpoints = {
     chats: 'http://chat.api.mks.io/chats',
     signup: 'http://chat.api.mks.io/signup',
     signin: 'http://chat.api.mks.io/signin'
   }
-  var firstRun = true
-  var canGet = {
+  var scriptRegex = /<script\b[^>]*>([\s\S]*?)<\/script>/gm;
+  // var firstRun = true
+  var username = ''
+  var password = ''
+  var token = null
+  var getters = {
     messages: function() {
       return messages
     }
   }
+  var setLogin = _.once(function(user, pass){
+    username = user
+    password = pass
+  })
   var fetch = function() {
     $.ajax({
       url: endpoints.chats,
       method: 'GET',
-      // contentType: 'application/json',
       success: function(json) {
-        messages = json
-        debugger
-        if(firstRun) {
-          app.events.emit('firstrun')
-          firstRun = false
-        }
+        json.forEach(function(message) {
+          if(!messages.hasOwnProperty(message.id)){
+            var sanitize = scriptRegex.exec(message.message)
+            if(sanitize) message.message = sanitize[1]
+            messages[message.id] = _.extend(message, {onPage: false})
+          }
+        })
         app.events.emit('change:messages')
         console.log('got messages from server')
       },
@@ -31,16 +39,68 @@ app.model = (function(){
       }
     })
   }
-  app.events.on('init', function() {
-    fetch()
-  })
+  var signin = function() {
+    $.ajax({
+      url: endpoints.signin,
+      method: 'POST',
+      data: {username: username, password: password},
+      success: function(json) {
+        token = json.apiToken
+        localStorage.username = username
+        localStorage.password = password
+        app.events.emit('signedin')        
+      },
+      error: function(json) {
+        console.log('error response from server')
+      }
+    })
+  }
+
+  var signup = function(user, pass) {
+    $.ajax({
+      url: endpoints.signup,
+      method: 'POST',
+      data: {username: user, password: pass},
+      success: function() {
+        username = user
+        password = pass
+        signin()
+      },
+      error: function(json) {
+        username = user
+        password = pass
+        signin()
+      }
+    })
+  }
+
+  var sendMessage = function(message) {
+    $.ajax({
+      url: endpoints.chats,
+      method: 'POST',
+      data: {message: message, apiToken: token},
+    })
+  }
+
+
+
+
+
+
+  // app.events.on('init', function() {
+  //   fetch()
+  // })
   var get = function(variable) {
-    if(canGet.hasOwnProperty(variable)) {
-      return canGet[variable]()
+    if(getters.hasOwnProperty(variable)) {
+      return getters[variable]()
     }
   }
   return {
     fetch: fetch,
-    get: get
+    get: get,
+    signup: signup,
+    signin: signin,
+    sendMessage: sendMessage,
+    setLogin: setLogin
   }
 })()
